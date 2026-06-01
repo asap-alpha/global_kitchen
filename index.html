@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Global Kitchen — Place Your Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #F7941D;
+    --orange-deep: #E07B00;
+    --orange-light: rgba(247,148,29,0.14);
+    --yellow: #FDB813;
+    --red: #E2231A;
+    --card-grad: linear-gradient(135deg, #F7941D 0%, #FDB813 100%);
+    --text: #FFFFFF;
+    --text-dark: #1A1A1A;
+    --muted: #9CA3AF;
+    --border: #2C2C2C;
+    --surface: #181818;
+    --surface-2: #202020;
+    --bg: #0C0C0C;
+    --radius: 14px;
+    --radius-sm: 9px;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 110px;
+  }
+  .hero {
+    background:
+      radial-gradient(circle at 50% 96px, rgba(247,148,29,0.22) 0%, rgba(247,148,29,0) 200px),
+      linear-gradient(180deg, #161616 0%, #0C0C0C 100%);
+    color: white;
+    padding: 2rem 1.25rem 1.75rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(247,148,29,0.10);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -70px; left: -50px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(226,35,26,0.12);
+  }
+  .hero > * { position: relative; z-index: 1; }
+  .hero-emoji { font-size: 40px; display: block; margin-bottom: 8px; }
+  .hero-logo {
+    width: 170px;
+    height: 170px;
+    margin: 0 auto 14px;
+    display: block;
+    background: transparent;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #FFFFFF;
+  }
+  .hero h1 .accent { color: var(--orange); }
+  .hero .tagline { font-size: 13px; margin-top: 4px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow); }
+  .hero p.sub { font-size: 14px; margin-top: 8px; color: rgba(255,255,255,0.78); }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 1.25rem; }
+
+  .name-card, .location-card, .notes-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .name-card label, .location-card label, .notes-card label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .name-card input, .location-card input, .location-card select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--surface-2);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .location-card select option { color: #1A1A1A; }
+  .name-card input::placeholder, .location-card input::placeholder, .notes-card textarea::placeholder { color: #6B7280; }
+  .name-card input:focus, .location-card input:focus, .location-card select:focus { border-color: var(--orange); }
+
+  .location-row { display: flex; gap: 8px; margin-top: 8px; }
+  .location-row input { flex: 1; }
+  .gps-btn {
+    background: var(--orange-light);
+    color: var(--orange);
+    border: 1px solid var(--orange);
+    border-radius: var(--radius-sm);
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  .gps-btn:hover { background: var(--orange); color: #1A1A1A; }
+  .gps-btn:disabled { opacity: 0.6; cursor: wait; }
+  .gps-status { font-size: 12px; color: var(--muted); margin-top: 6px; min-height: 16px; }
+  .gps-status.ok { color: var(--yellow); }
+  .gps-status.err { color: #F87171; }
+
+  .section { margin-bottom: 1.5rem; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .section-header .badge {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFFFFF;
+    background: var(--red);
+    padding: 4px 12px;
+    border-radius: 7px;
+    letter-spacing: 0.02em;
+  }
+  .section-line { flex: 1; height: 2px; background: var(--card-grad); border-radius: 2px; opacity: 0.5; }
+  .section-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 8px 0 10px;
+    font-style: italic;
+  }
+
+  .items-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+    gap: 10px;
+  }
+  .item:hover { border-color: var(--orange); }
+  .item.selected {
+    border-color: var(--orange);
+    background: var(--orange-light);
+  }
+
+  .item-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .item-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .item.selected .item-check {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+  .item-check svg { display: none; }
+  .item.selected .item-check svg { display: block; }
+
+  .item-name { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.35; }
+  .item.selected .item-name { color: var(--orange); }
+  .item-desc { font-size: 12px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
+
+  .item-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .item-price {
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A1A1A;
+    background: var(--card-grad);
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .qty-controls { display: none; align-items: center; gap: 6px; }
+  .item.selected .qty-controls { display: flex; }
+  .qty-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--orange);
+    background: transparent;
+    color: var(--orange);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.1s;
+  }
+  .qty-btn:hover { background: var(--orange); color: #1A1A1A; }
+  .qty-num {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+    color: var(--orange);
+  }
+
+  .notes-card textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--surface-2);
+    outline: none;
+    resize: vertical;
+    min-height: 72px;
+    transition: border-color 0.15s;
+  }
+  .notes-card textarea:focus { border-color: var(--orange); }
+
+  .business-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .business-card h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .biz-rows { display: flex; flex-direction: column; gap: 10px; }
+  .biz-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .biz-row .biz-icon {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--orange-light);
+    color: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .biz-row .biz-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+    font-weight: 500;
+  }
+  .biz-row .biz-value { font-size: 14px; color: var(--text); word-break: break-word; }
+  .biz-row a { color: var(--orange); text-decoration: none; }
+  .biz-row a:hover { text-decoration: underline; }
+
+  .sticky-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #141414;
+    border-top: 1px solid var(--border);
+    padding: 12px 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  }
+  .order-summary { line-height: 1.3; }
+  .order-summary .label { font-size: 12px; color: var(--muted); }
+  .order-summary .value { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); }
+
+  .send-btn {
+    background: var(--card-grad);
+    color: #1A1A1A;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: filter 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .send-btn:hover { filter: brightness(1.06); }
+  .send-btn:active { transform: scale(0.97); }
+  .send-btn:disabled {
+    background: var(--surface-2);
+    color: var(--muted);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .total-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .total-value { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: var(--yellow); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <img class="hero-logo" src="logo.jpeg" alt="Global Kitchen logo"
+       onerror="this.style.display='none'; document.getElementById('hero-emoji-fallback').style.display='block';" />
+  <span class="hero-emoji" id="hero-emoji-fallback" style="display:none">🍽</span>
+  <h1>Global <span class="accent">Kitchen</span></h1>
+  <div class="tagline">A World of Flavour</div>
+  <p class="sub">Select your items and we'll confirm on WhatsApp</p>
+</div>
+
+<div class="container">
+
+  <div class="business-card">
+    <h3>📍 Contact Global Kitchen</h3>
+    <div class="biz-rows">
+      <div class="biz-row">
+        <div class="biz-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/></svg></div>
+        <div>
+          <div class="biz-label">WhatsApp</div>
+          <div class="biz-value"><a id="biz-whatsapp-link" href="https://wa.me/233000000000" target="_blank">[Add WhatsApp number]</a></div>
+        </div>
+      </div>
+      <div class="biz-row">
+        <div class="biz-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+        <div>
+          <div class="biz-label">Phone / Contact</div>
+          <div class="biz-value">[Add phone number]</div>
+        </div>
+      </div>
+      <div class="biz-row">
+        <div class="biz-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div>
+          <div class="biz-label">Location</div>
+          <div class="biz-value">[Add restaurant location]</div>
+        </div>
+      </div>
+      <div class="biz-row">
+        <div class="biz-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
+        <div>
+          <div class="biz-label">Open hours</div>
+          <div class="biz-value">[Add opening hours]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="name-card">
+    <label for="cname">Your name</label>
+    <input type="text" id="cname" placeholder="e.g. Kofi Mensah" autocomplete="off" />
+  </div>
+
+  <div class="location-card">
+    <label for="loc-area">Delivery area</label>
+    <select id="loc-area">
+      <option value="">Select your area (or choose Other)</option>
+      <option value="Pickup at restaurant">🏠 Pickup at restaurant</option>
+      <option value="[NEEDS_INPUT: Area 1 description]">Area 1</option>
+      <option value="[NEEDS_INPUT: Area 2 description]">Area 2</option>
+      <option value="[NEEDS_INPUT: Area 3 description]">Area 3</option>
+      <option value="Other">Other (enter below)</option>
+    </select>
+    <div class="location-row">
+      <input type="text" id="loc-address" placeholder="House number, street, landmark…" autocomplete="off" />
+      <button type="button" class="gps-btn" id="gps-btn" onclick="shareGps()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-7.58-7-12a7 7 0 1 1 14 0c0 4.42-7 12-7 12z"/></svg>
+        GPS
+      </button>
+    </div>
+    <div class="gps-status" id="gps-status"></div>
+  </div>
+
+  <div id="menu"></div>
+
+  <div class="notes-card">
+    <label for="notes">Special instructions <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+    <textarea id="notes" placeholder="e.g. no pepper, extra sauce, less spice…"></textarea>
+  </div>
+
+</div>
+
+<div class="sticky-bar">
+  <div class="order-summary">
+    <div class="label">Your order</div>
+    <div class="value" id="count-display">0 items</div>
+    <div class="total-value" id="total-display"></div>
+  </div>
+  <button class="send-btn" id="send-btn" disabled onclick="sendOrder()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg>
+    Send on WhatsApp
+  </button>
+</div>
+
+<script>
+const WHATSAPP_NUMBER = "233000000000"; // [NEEDS_INPUT] Replace with Global Kitchen's WhatsApp number
+
+const menu = [
+  { section: "Rice Dishes", items: [
+    { name: "Jollof Rice with Chicken", price: 60 },
+    { name: "Jollof Rice with Fish", price: 80 },
+    { name: "Jollof Rice with Beef/Mutton", price: 50 },
+    { name: "Fried Rice with Chicken", price: 60 },
+    { name: "Fried Rice with Fish", price: 80 },
+    { name: "Fried Rice with Tilapia", price: 120 },
+    { name: "Plain Rice with Chicken", price: 50 },
+    { name: "Plain Rice with Fish", price: 80 },
+    { name: "Plain Rice with Beef/Mutton", price: 50 },
+  ]},
+  { section: "Waakye", items: [
+    { name: "Waakye", price: 50, desc: "with Egg, Beef, Gari, Spaghetti, Salad, Plantain, Pear" },
+  ]},
+  { section: "Noodles", items: [
+    { name: "Assorted Noodles", price: 70, desc: "Shredded chicken, Sausage, Eggs, Sardines and Veggies" },
+    { name: "Indomie Noodles", price: 50, desc: "Sausage/Gizzards, Scrambled eggs and Veggies" },
+    { name: "Spaghetti Noodles", price: 50, desc: "Fried Eggs, Sausages, Gizzards and Veggies" },
+  ]},
+  { section: "Loaded Fries & Kenkey", items: [
+    { name: "Loaded Fries", price: 80 },
+    { name: "Mega Loaded Fries", price: 120 },
+    { name: "Loaded Kenkey", price: 45, desc: "Gizzards/Sausages, Two ball, Fish, Fried egg, Sardine, Pear" },
+  ]},
+  { section: "Fufu & Local", items: [
+    { name: "Fufu with Goat meat", price: 40 },
+    { name: "Fufu with Salmon", price: 40 },
+    { name: "Fufu with Tilapia/Fish", price: 80 },
+    { name: "TZ with Green Green Soup/Goat meat", price: 40 },
+  ]},
+];
+
+const selected = {};
+let gpsCoords = null;
+
+function priceLabel(item) {
+  return `GH₵${item.price}`;
+}
+
+function safeKey(name) {
+  return name.replace(/\s+/g,'_').replace(/[()—.]/g,'').replace(/[^A-Za-z0-9_]/g,'');
+}
+
+function renderMenu() {
+  const container = document.getElementById('menu');
+  menu.forEach(({ section, note, items }) => {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<span class="badge">${section}</span><div class="section-line"></div>`;
+    sec.appendChild(header);
+
+    if (note) {
+      const n = document.createElement('div');
+      n.className = 'section-note';
+      n.textContent = note;
+      sec.appendChild(n);
+    }
+
+    const list = document.createElement('div');
+    list.className = 'items-list';
+
+    items.forEach((item) => {
+      const { name, price, desc } = item;
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.dataset.name = name;
+      div.dataset.price = price;
+      const key = safeKey(name);
+      div.innerHTML = `
+        <div class="item-left">
+          <div class="item-check">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"/></svg>
+          </div>
+          <div>
+            <div class="item-name">${name}</div>
+            ${desc ? `<div class="item-desc">${desc}</div>` : ''}
+          </div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">${priceLabel(item)}</div>
+          <div class="qty-controls">
+            <button class="qty-btn" data-action="dec" data-key="${key}" data-name="${name.replace(/"/g,'&quot;')}">−</button>
+            <span class="qty-num" id="qty-${key}">1</span>
+            <button class="qty-btn" data-action="inc" data-key="${key}" data-name="${name.replace(/"/g,'&quot;')}">+</button>
+          </div>
+        </div>`;
+      div.addEventListener('click', (e) => {
+        if (e.target.closest('.qty-btn')) return;
+        toggleItem(name, price, div);
+      });
+      list.appendChild(div);
+    });
+
+    sec.appendChild(list);
+    container.appendChild(sec);
+  });
+
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('.qty-btn');
+    if (!btn) return;
+    e.stopPropagation();
+    const name = btn.dataset.name;
+    const delta = btn.dataset.action === 'inc' ? 1 : -1;
+    changeQty(name, delta);
+  });
+}
+
+function toggleItem(name, price, el) {
+  if (selected[name]) {
+    delete selected[name];
+    el.classList.remove('selected');
+  } else {
+    selected[name] = { qty: 1, price };
+    el.classList.add('selected');
+  }
+  updateSummary();
+}
+
+function changeQty(name, delta) {
+  if (!selected[name]) return;
+  selected[name].qty = Math.max(1, selected[name].qty + delta);
+  const el = document.getElementById('qty-' + safeKey(name));
+  if (el) el.textContent = selected[name].qty;
+  updateSummary();
+}
+
+function updateSummary() {
+  const entries = Object.entries(selected);
+  const totalItems = entries.reduce((a,[,v]) => a + v.qty, 0);
+  const totalPrice = entries.reduce((a,[,v]) => a + v.qty * v.price, 0);
+  document.getElementById('count-display').textContent = totalItems === 0 ? '0 items' : totalItems + (totalItems===1?' item':' items');
+  const totalText = totalItems > 0 ? `Total: GH₵${totalPrice}` : '';
+  document.getElementById('total-display').textContent = totalText;
+  document.getElementById('send-btn').disabled = totalItems === 0;
+}
+
+function shareGps() {
+  const btn = document.getElementById('gps-btn');
+  const status = document.getElementById('gps-status');
+  if (!navigator.geolocation) {
+    status.textContent = 'GPS not supported on this device.';
+    status.className = 'gps-status err';
+    return;
+  }
+  btn.disabled = true;
+  status.textContent = 'Getting your location…';
+  status.className = 'gps-status';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      gpsCoords = { lat, lng };
+      status.textContent = `Location captured (${lat}, ${lng}) — will be shared on send.`;
+      status.className = 'gps-status ok';
+      btn.disabled = false;
+    },
+    (err) => {
+      gpsCoords = null;
+      status.textContent = 'Could not get location: ' + err.message;
+      status.className = 'gps-status err';
+      btn.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+function buildLocationText() {
+  const area = document.getElementById('loc-area').value.trim();
+  const address = document.getElementById('loc-address').value.trim();
+  const parts = [];
+  if (area && area !== 'Other') parts.push(area);
+  if (address) parts.push(address);
+  let text = parts.join(' — ');
+  if (gpsCoords) {
+    const mapsLink = `https://maps.google.com/?q=${gpsCoords.lat},${gpsCoords.lng}`;
+    text = text ? `${text}\n  GPS: ${mapsLink}` : `GPS: ${mapsLink}`;
+  }
+  return text;
+}
+
+function sendOrder() {
+  const name = document.getElementById('cname').value.trim() || 'A customer';
+  const notes = document.getElementById('notes').value.trim();
+  const location = buildLocationText();
+  const lines = Object.entries(selected)
+    .map(([item, {qty, price}]) => {
+      const qtyText = qty > 1 ? ' x'+qty : '';
+      return `  • ${item}${qtyText} — GH₵${qty * price}`;
+    })
+    .join('\n');
+  const totalPrice = Object.values(selected).reduce((a,v) => a + v.qty * v.price, 0);
+  const msg =
+    `*NEW ORDER — Global Kitchen*\n` +
+    `\n` +
+    `*Name:* ${name}\n` +
+    (location ? `*Location:* ${location}\n` : '') +
+    `\n*Items:*\n${lines}\n\n` +
+    `*Total: GH₵${totalPrice}*` +
+    (notes ? `\n\n*Note:* ${notes}` : '') +
+    `\n\n_Sent via order form_`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+renderMenu();
+</script>
+</body>
+</html>
